@@ -1,0 +1,131 @@
+trigger:
+  - none   # manual run only
+
+pool:
+  name: Default
+
+stages:
+# ---------------------------
+# Stage 1 – Build React App
+# ---------------------------
+- stage: Build
+  displayName: "Build React App"
+  jobs:
+  - job: BuildReact
+    displayName: "Build React"
+    steps:
+    - checkout: self
+
+    - script: |
+        echo "Running on $(Agent.Name)"
+        ls -l
+        pwd
+      displayName: "Verify agent and list files"
+
+    - script: |
+        echo "Cleaning old node_modules..."
+        rm -rf $(Build.SourcesDirectory)/client/node_modules
+        rm -f $(Build.SourcesDirectory)/client/package-lock.json
+      displayName: "Clean npm cache"
+
+    - script: |
+        echo "Installing dependencies..."
+        npm install
+      workingDirectory: $(Build.SourcesDirectory)/client
+      displayName: "Install npm packages"
+
+    - script: |
+        echo "Building React app..."
+        npm run build
+      workingDirectory: $(Build.SourcesDirectory)/client
+      displayName: "Build React app"
+
+
+# ---------------------------
+# Stage 2 – SonarQube Analysis
+# ---------------------------
+# - stage: SonarQube
+#   displayName: "SonarQube Analysis"
+#   jobs:
+#   - job: Sonar
+#     displayName: "Run SonarQube Scan"
+#     steps:
+#     - checkout: self
+
+#     # Prepare SonarQube (Community Edition)
+#     - task: SonarQubePrepare@5
+#       displayName: "Prepare SonarQube Analysis"
+#       inputs:
+#         SonarQube: 'SonarConnection'  # name of service connection
+#         scannerMode: 'CLI'
+#         configMode: 'manual'
+#         cliProjectKey: 'my-react-app'
+#         cliProjectName: 'TestGitwithSonar'
+#         cliSources: 'client/src'
+#         extraProperties: |
+#           sonar.verbose=true
+#           sonar.branch.name=
+#           sonar.branch.target=
+
+#     # Run build so that SonarQube can see compiled output if needed
+#     - script: |
+#         npm install
+#         npm run build
+#       workingDirectory: $(Build.SourcesDirectory)/client
+#       displayName: "Build App"
+
+#     # Run the actual analysis
+#     - task: SonarQubeAnalyze@5
+#       displayName: "Run SonarQube Code Analysis"
+
+#     # Publish the results to the build summary
+#     - task: SonarQubePublish@5
+#       displayName: "Publish SonarQube Quality Gate Results"
+#       inputs:
+#         pollingTimeoutSec: '300'
+
+
+# ---------------------------
+# Stage 3 – Build & Push Docker Image
+# ---------------------------
+- stage: Dockerize
+  displayName: "Build and Push Docker Image"
+  dependsOn: 
+    - Build
+  jobs:
+  - job: DockerBuildPush
+    displayName: "Docker Build & Push"
+    steps:
+    - checkout: self
+
+    - script: |
+        echo "Building Docker image..."
+        docker build -t myreactapp:$(Build.BuildId) .
+      displayName: "Build Docker Image"
+
+    - script: |
+        echo "Logging in to Docker Hub..."
+        echo "$(DOCKER_HUB_PASSWORD)" | docker login -u "$(DOCKER_HUB_USERNAME)" --password-stdin
+
+        echo "Tagging image..."
+        docker tag myreactapp:$(Build.BuildId) $(DOCKER_HUB_USERNAME)/myreactapp:$(Build.BuildId)
+
+        echo "Pushing image..."
+        docker push $(DOCKER_HUB_USERNAME)/myreactapp:$(Build.BuildId)
+      displayName: "Push Docker Image"
+      env:
+        DOCKER_HUB_USERNAME: $(DOCKER_HUB_USERNAME)
+        DOCKER_HUB_PASSWORD: $(DOCKER_HUB_PASSWORD)
+
+    - script: |
+        echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$(Build.BuildId)"
+      name: SetImageTag
+      displayName: "Set IMAGE_TAG variable"
+
+    - script: |
+        echo "$(IMAGE_TAG)" > $(Build.ArtifactStagingDirectory)/image_tag.txt
+      displayName: "Save IMAGE_TAG to file"
+
+    - publish: $(Build.ArtifactStagingDirectory)
+      artifact: drop
+      displayName: "Publish artifact with image tag"
