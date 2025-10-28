@@ -1,28 +1,22 @@
-# ------- BACKEND --------
-# ----- Stage 1: Build -----
-FROM node:18-alpine AS build
+# -------- BACKEND (Node.js + MongoDB) --------
+
+# Use Node.js base image
+FROM node:18-alpine
+
+# Set working directory
 WORKDIR /app
 
-# Copy package files and install dependencies
+# Copy only package files first (for caching)
 COPY server/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the frontend and build
-COPY server/ ./
-#RUN npm run build
+# Copy the rest of the backend code
+COPY server/ .
 
-# ----- Stage 2: Serve -----
-FROM node:18-alpine AS production
-WORKDIR /app
-
-# Install 'serve' only
-RUN npm install -g serve
-
-# Copy only the built static files from the build stage
-COPY --from=build /app/build ./build
-
-# Expose port 4001
+# Expose backend port
 EXPOSE 4001
 
-# Serve the app
-CMD ["serve", "-s", "build", "-l", "4001", "-n"]
+# Command to run the app
+CMD ["node", "index.js"]
