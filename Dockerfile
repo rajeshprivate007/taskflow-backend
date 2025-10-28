@@ -9,7 +9,7 @@ RUN npm install
 
 # Copy the rest of the frontend and build
 COPY server/ ./
-RUN npm run build
+#RUN npm run build
 
 # ----- Stage 2: Serve -----
 FROM node:18-alpine AS production
