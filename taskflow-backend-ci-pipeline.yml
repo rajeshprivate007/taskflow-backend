@@ -24,20 +24,20 @@ stages:
 
     - script: |
         echo "Cleaning old node_modules..."
-        rm -rf $(Build.SourcesDirectory)/client/node_modules
-        rm -f $(Build.SourcesDirectory)/client/package-lock.json
+        rm -rf $(Build.SourcesDirectory)/server/node_modules
+        rm -f $(Build.SourcesDirectory)/server/package-lock.json
       displayName: "Clean npm cache"
 
     - script: |
         echo "Installing dependencies..."
         npm install
-      workingDirectory: $(Build.SourcesDirectory)/client
+      workingDirectory: $(Build.SourcesDirectory)/server
       displayName: "Install npm packages"
 
     - script: |
         echo "Building React app..."
         npm run build
-      workingDirectory: $(Build.SourcesDirectory)/client
+      workingDirectory: $(Build.SourcesDirectory)/server
       displayName: "Build React app"
 
 
