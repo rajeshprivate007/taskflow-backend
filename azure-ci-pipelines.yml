@@ -100,7 +100,7 @@ stages:
 
     - script: |
         echo "Building Docker image..."
-        docker build -t myreactapp:$(Build.BuildId) .
+        docker build -t taskflow-backend:$(Build.BuildId) .
       displayName: "Build Docker Image"
 
     - script: |
@@ -108,10 +108,10 @@ stages:
         echo "$(DOCKER_HUB_PASSWORD)" | docker login -u "$(DOCKER_HUB_USERNAME)" --password-stdin
 
         echo "Tagging image..."
-        docker tag myreactapp:$(Build.BuildId) $(DOCKER_HUB_USERNAME)/myreactapp:$(Build.BuildId)
+        docker tag taskflow-backend:$(Build.BuildId) $(DOCKER_HUB_USERNAME)/taskflow-backend:$(Build.BuildId)
 
         echo "Pushing image..."
-        docker push $(DOCKER_HUB_USERNAME)/myreactapp:$(Build.BuildId)
+        docker push $(DOCKER_HUB_USERNAME)/taskflow-backend:$(Build.BuildId)
       displayName: "Push Docker Image"
       env:
         DOCKER_HUB_USERNAME: $(DOCKER_HUB_USERNAME)
