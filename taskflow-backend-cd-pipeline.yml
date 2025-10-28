@@ -7,7 +7,7 @@ pool:
 resources:
   pipelines:
     - pipeline: buildApp   # a local alias you choose
-      source: 'react-application-CI-pipeline'  # name of the first pipeline as it appears in DevOps
+      source: 'taskflow-backend-CI-pipeline'  # name of the first pipeline as it appears in DevOps
       project: 'rajeshsahuprivate' # optional if in same project
       branch: main         # optional if you only want main branch
       trigger:
@@ -21,7 +21,7 @@ steps:
       echo "$(DOCKER_HUB_PASSWORD)" | docker login -u "$(DOCKER_HUB_USERNAME)" --password-stdin
        
        # Fetch the latest numeric tag from DockerHub
-       IMAGE_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/$(DOCKER_HUB_USERNAME)/myreactapp/tags?page_size=100" \
+       IMAGE_TAG=$(curl -s "https://registry.hub.docker.com/v2/repositories/$(DOCKER_HUB_USERNAME)/taskflow-backend/tags?page_size=100" \
        | jq -r '.results[].name' \
        | grep -E '^[0-9]+$' \
        | sort -n \
@@ -40,7 +40,7 @@ steps:
 
   - script: |
       echo "Deploying to Minikube with Helm using IMAGE_TAG=$(IMAGE_TAG)"
-      helm upgrade --install myreactapp ./react-helm-chart \
+      helm upgrade --install askflow-backend ./react-helm-chart \
         --set image.tag=$(IMAGE_TAG) \
-        --set image.repository=$(DOCKER_HUB_USERNAME)/myreactapp
+        --set image.repository=$(DOCKER_HUB_USERNAME)/askflow-backend
     displayName: "Deploy Helm chart to Minikube"
