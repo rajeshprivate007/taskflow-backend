@@ -101,7 +101,7 @@ stages:
     - script: |
         echo "Building Docker image..."
         docker build -t taskflow-backend:$(Build.BuildId) .
-      displayName: "Build Docker Image"
+      displayName: "Build Docker Image "
 
     - script: |
         echo "Logging in to Docker Hub..."
