@@ -34,11 +34,11 @@ stages:
       workingDirectory: $(Build.SourcesDirectory)/server
       displayName: "Install npm packages"
 
-    - script: |
-        echo "Building React app..."
-        npm run build
-      workingDirectory: $(Build.SourcesDirectory)/server
-      displayName: "Build React app"
+ #   - script: |
+ #       echo "Building React app..."
+ #       npm run build
+ #     workingDirectory: $(Build.SourcesDirectory)/server
+ #     displayName: "Build React app"
 
 
 # ---------------------------
