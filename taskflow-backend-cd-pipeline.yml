@@ -40,7 +40,7 @@ steps:
 
   - script: |
       echo "Deploying to Minikube with Helm using IMAGE_TAG=$(IMAGE_TAG)"
-      helm upgrade --install askflow-backend ./react-helm-chart \
+      helm upgrade --install taskflow-backend ./react-helm-chart \
         --set image.tag=$(IMAGE_TAG) \
-        --set image.repository=$(DOCKER_HUB_USERNAME)/askflow-backend
+        --set image.repository=$(DOCKER_HUB_USERNAME)/taskflow-backend
     displayName: "Deploy Helm chart to Minikube"
