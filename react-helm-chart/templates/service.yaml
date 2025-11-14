@@ -14,4 +14,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "react-helm-chart.selectorLabels" . | nindent 4 }}
+    {{- include "react-helm-chart.selectorLabels" . | nindent 4 }} 
